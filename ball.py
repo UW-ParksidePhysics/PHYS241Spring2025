@@ -19,5 +19,5 @@ time_frequency = int(1 / time_interval)
 
 
 for time in times:
-    vp.rate(time_frequency)
+    vp.rate(0.25 * time_frequency)
     ball_two.pos = ball_two_velocity * time + ball_two_initial_position

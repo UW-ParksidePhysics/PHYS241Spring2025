@@ -5,6 +5,64 @@ __author__ = "William Parker"
 
 import numpy as np
 import matplotlib.pyplot as plt
+import requests
+from bs4 import BeautifulSoup
+
+# URL of NASA Planetary Fact Sheet
+URL = "https://nssdc.gsfc.nasa.gov/planetary/factsheet/"
+
+
+def get_planetary_data():
+    response = requests.get(URL)
+    if response.status_code != 200:
+        print("Failed to retrieve data")
+        return {}
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Find the main table that contains planetary data
+    tables = soup.find_all("table")
+    print(f"Number of tables found: {len(tables)}")
+
+    # Assuming the table of interest is the second one
+    planetary_table = tables[1] if len(tables) > 1 else tables[0]
+    if not planetary_table:
+        print("Could not find the planetary data table")
+        return {}
+
+    object_data = {}
+
+    # Find all rows in the table
+    rows = planetary_table.find_all("tr")
+
+    for row in rows:
+        print(row.find_all("td")[0].get_text()[:6])
+        print()
+    # Extract header and data
+    # headers = [td.get_text(strip=True) for td in rows.find_all("td")]
+    # print(headers)
+    gravity_index = headers.index("Gravity (m/s²)") if "Gravity (m/s²)" in headers else -1
+
+    if gravity_index == -1:
+        print("Could not find Gravity column")
+        return {}
+
+    # Extract data rows
+    for row in rows[1:]:
+        columns = row.find_all("td")
+        if len(columns) > gravity_index:
+            name = columns[0].text.strip()
+            gravity = columns[gravity_index].text.strip()
+
+            # Convert gravity to float if possible
+            try:
+                gravity = float(gravity)
+            except ValueError:
+                gravity = None
+
+            object_data[name] = gravity
+
+    return object_data
 
 
 def test_plot():
@@ -55,7 +113,26 @@ def velocity_in_height(height, initial_height=0, initial_velocity=0, gravitation
 
 
 if __name__ == '__main__':
-    test_plot()
+    # object_data = {'Earth': 9.8, 'Moon': 1.6, 'Mars': 3.7}  # surface gravity [m/s/s]
+    # starting_velocity = 10  #  m/s
+    # times = np.linspace(0, 5)
+    # for planet_data in object_data.items():
+    #     velocities = velocity_in_time(times, initial_velocity=starting_velocity,
+    #                                   gravitational_acceleration=planet_data[1])
+    #     plt.plot(times, velocities, label=planet_data[0])
+    #
+    # plt.text(0, velocities[-1], f'Initial velocity: {starting_velocity:.0f} m/s')
+    # plt.xlabel("Time (s)")
+    # plt.ylabel("Velocity (m/s)")
+    # plt.legend()
+    # plt.show()
+
+
+    # Retrieve and store data
+    object_data = get_planetary_data()
+
+    # Print result
+    # print(object_data)
 
     # print(f'Tests for freefall motion calculations:')
     # starting_velocity = 1
