@@ -18,22 +18,22 @@ def generate_matrix(minimum_x, maximum_x, number_of_dimensions, potential_name, 
     :return:                        NumPy array (N,N) :: Hamiltonian matrix created from potential
     """
 
-    hbar = 1.0
+    action_quantum = 1.0
     mass = 1.0
 
     grid_spacing = (maximum_x - minimum_x)/(number_of_dimensions - 1)
-    units_prefactor = hbar**2 / (2 * mass * grid_spacing**2)
+    units_prefactor = action_quantum**2 / (2 * mass * grid_spacing**2)
 
     horizontal_grid = np.linspace(minimum_x, maximum_x, num=number_of_dimensions)
     if potential_name == 'harmonic':
-        angular_frequency = potential_parameter * hbar / (mass * (maximum_x - minimum_x)**2)
+        angular_frequency = potential_parameter * action_quantum / (mass * (maximum_x - minimum_x)**2)
         reduced_potential = 0.5 * mass * np.power(angular_frequency * horizontal_grid, 2) / units_prefactor
 
     elif potential_name == 'sinusoidal':
         well_width = (maximum_x - minimum_x)
         wave_vector = np.pi / well_width
-        pre_factor = 5 * potential_parameter * hbar**2 / (2. * mass * well_width**2)
-        reduced_potential = pre_factor * np.sin(wave_vector * (horizontal_grid + 0.5*well_width)) / units_prefactor
+        prefactor = 5 * potential_parameter * action_quantum**2 / (2. * mass * well_width**2)
+        reduced_potential = prefactor * np.sin(wave_vector * (horizontal_grid + 0.5*well_width)) / units_prefactor
 
     elif potential_name == 'square':
         well_width = (maximum_x - minimum_x) / 2.
@@ -73,8 +73,8 @@ if __name__ == "__main__":
         print(f'H[{potential}, {dimension_number}] = {hamiltonian_matrix}')
         print()
 
-        import matplotlib as mpl
-        mpl.use('macosx')
+        # import matplotlib as mpl
+        # mpl.use('macosx')
 
         import matplotlib.pyplot as plt
 
@@ -83,5 +83,5 @@ if __name__ == "__main__":
         plt.plot(x_values, y_values)
         plt.xlabel(r'$x_i$')
         plt.ylabel(r'$H[x_i]$')
-        plt.title(rf'$v =$ {potential}, $N = ${dimension_number}')
+        plt.title(rf'$v =$ {potential.capitalize()}, $N = ${dimension_number}')
         plt.show()

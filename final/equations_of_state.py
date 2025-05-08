@@ -8,13 +8,13 @@ __author__ = 'Ryan Glusic and William Parker'
 import numpy as np
 
 
-def fit_eos(volumes, energies, quadratic_coefficients, eos='vinet', number_of_points=50):
+def fit_equation_of_state(volumes, energies, quadratic_coefficients, equation_of_state='vinet', number_of_points=50):
     """
     Returns a NumPy array of values evaluated to an equation of state fit
     :param volumes:                 NumPy array(N) :: volumes (x-values) to be fit
     :param energies:                NumPy array(N) :: energies (y-values) to be fit
     :param quadratic_coefficients:  list(3) :: coefficients of the quadratic polynomial already fit to the data
-    :param eos:                     str :: equation of state name ('murnaghan', 'birch-murnaghan', 'vinet')
+    :param equation_of_state:                     str :: equation of state name ('murnaghan', 'birch-murnaghan', 'vinet')
     :param number_of_points:        int, optional :: number of points to evaluate fit function on
     :return:                        NumPy array(number_of_points) :: equation of state fit evaluated on grid,
 
@@ -49,16 +49,16 @@ def fit_eos(volumes, energies, quadratic_coefficients, eos='vinet', number_of_po
     initial_parameters = [quadratic_minimum, quadratic_bulk_modulus,
                           bulk_modulus_derivative, quadratic_axis_of_symmetry]
 
-    eos_parameters, eos_covariances = curve_fit(lambda_dictionary[eos.lower()], volumes, energies,
+    equation_parameters, equation_covariances = curve_fit(lambda_dictionary[equation_of_state.lower()], volumes, energies,
                                                 p0=initial_parameters, method='trf')  # ,
     # x_scale=[10**np.floor(np.log10(np.amin(np.abs(energies)))), 100, 1,
     #         10**np.floor(np.log10(np.amin(np.abs(volumes))))])
     fit_curve_volumes = np.linspace(minimum_volume, maximum_volume, num=number_of_points)
-    eos_fit_curve = lambda_dictionary[eos.lower()](fit_curve_volumes,
-                                                   eos_parameters[0], eos_parameters[1], eos_parameters[2],
-                                                   eos_parameters[3])
+    equation_fit_curve = lambda_dictionary[equation_of_state.lower()](fit_curve_volumes,
+                                                                 equation_parameters[0], equation_parameters[1], equation_parameters[2],
+                                                                 equation_parameters[3])
 
-    return eos_fit_curve, eos_parameters
+    return equation_fit_curve, equation_parameters
 
 
 def murnaghan(volumes, equilibrium_energy, bulk_modulus, bulk_modulus_derivative, equilibrium_volume):
@@ -164,10 +164,11 @@ if __name__ == "__main__":
     equations_of_state = ['murnaghan', 'birch-murnaghan', 'vinet']
     figures, axes = plt.subplots(nrows=len(equations_of_state))
 
-    for index, eos_form in enumerate(equations_of_state):
-        eos, eos_parameters = fit_eos(test_volumes, test_energies, starting_coefficients, eos=eos_form,
-                                      number_of_points=fit_point_number)
-        axes[index].plot(np.linspace(10, 14, num=fit_point_number), eos)
+    for index, equation_form in enumerate(equations_of_state):
+        equation_of_state, equation_parameters = fit_equation_of_state(test_volumes, test_energies, starting_coefficients, equation_of_state=equation_form,
+                                                                       number_of_points=fit_point_number)
+        axes[index].plot(np.linspace(10, 14, num=fit_point_number), equation_of_state)
         axes[index].scatter(test_volumes, test_energies)
-        axes[index].text(12, -19, eos_form.title(), ha='center', va='center')
+        axes[index].text(12, -19, equation_form.title(), ha='center', va='center')
+        axes[index].set(xlabel=r'$V$', ylabel=r'$E$')
     plt.show()
